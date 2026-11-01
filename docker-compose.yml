@@ -1,0 +1,62 @@
+# VISIONAI — fullstack AI video generation platform
+#
+# Quick start (AI engine only — this is all you need for generation):
+#     docker compose up ai
+#
+# Full stack (Next.js studio + AI engine) via the optional "full" profile:
+#     docker compose --profile full up
+#
+# The web (Next.js) service is in the "full" profile so that
+# `docker compose up ai` starts ONLY the AI generation service.
+
+services:
+  ai:
+    build:
+      context: .
+      dockerfile: ai/Dockerfile
+    image: visionai-engine
+    container_name: visionai-ai
+    ports:
+      - "8000:8000"
+    environment:
+      - VISIONAI_ENGINE=procedural
+      - VISIONAI_DEVICE=auto
+      - STORAGE_DIR=/app/storage
+      - KEEP_FILES_HOURS=24
+      - RATE_LIMIT_PER_MINUTE=30
+      - CORS_ALLOW_ORIGINS=*
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ai_storage:/app/storage
+      # Live-reload the engine during development (comment out for production):
+      - ./ai:/app
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: visionai-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Point this at your Postgres instance:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/app_db
+      # The studio talks to the AI engine through this URL:
+      - PYTHON_BACKEND_URL=http://ai:8000
+    depends_on:
+      - ai
+    profiles:
+      - full
+    restart: unless-stopped
+
+volumes:
+  ai_storage:

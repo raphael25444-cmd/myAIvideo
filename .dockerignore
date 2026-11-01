@@ -1,0 +1,7 @@
+node_modules
+.next
+.git
+ai/storage
+.env
+README.md
+*.md

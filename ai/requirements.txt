@@ -1,0 +1,24 @@
+# VISIONAI AI engine — core dependencies (CPU-friendly, no heavy models)
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+numpy==1.26.4
+Pillow==11.0.0
+
+# Bundles a static ffmpeg binary so video encoding ALWAYS works, even with no
+# system ffmpeg installed. This is what guarantees real MP4 output.
+imageio==2.37.0
+imageio-ffmpeg==0.5.1
+
+# ---------------------------------------------------------------------------
+# OPTIONAL — only needed when VISIONAI_ENGINE=diffusers (real diffusion model)
+# Install these in your environment / Docker image to enable true text-to-image
+# video generation. They are intentionally NOT in the default install because
+# they are large (hundreds of MB) and only required for that engine.
+#
+#   torch==2.5.1
+#   torchvision==0.20.1
+#   diffusers==0.32.2
+#   accelerate==1.2.1
+#   safetensors==0.4.5
+# ---------------------------------------------------------------------------
